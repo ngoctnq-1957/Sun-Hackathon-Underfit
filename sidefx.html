@@ -5,7 +5,8 @@
    <script type="text/javascript">
       function submit() {
          let elem = document.getElementById('output');
-         elem.innerText = "tính năng chưa được implement!";
+         let drug_name = document.getElementsByTagName("input")[0].value;
+         elem.innerText = "đã nhận: \"" + drug_name + "\"";
       }
       function on_hover() {
          let elems = document.getElementsByClassName('selected');

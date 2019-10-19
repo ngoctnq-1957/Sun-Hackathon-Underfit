@@ -1,20 +1,35 @@
 <!doctype html>
 <head>
    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-   <title>RnD.Underfit's Drugs' Side Effects Lookup</title>
+   <title>RnD.Underfit's Drugs' Interactions Lookup</title>
    <script type="text/javascript">
       function submit() {
          let form = document.getElementsByTagName("form")[0];
          let elem = document.getElementById('output');
+         let drugs = [];
+         let files = [];
          let value = "";
-         elem.innerHTML = "các thuốc đã được nhập:<ul>";
          for (let e of form.elements) {
-            if (e.tagName === "INPUT" && e.type === "text") {
-               value = e.value;
-               if (e.value !== "")
-                  elem.innerHTML += ("<li>"+value+"</li>");
+            if (e.tagName === "INPUT") {
+               if (e.type === "text") {
+                  value = e.value;
+                  if (e.value !== "")
+                     drugs.push(value);
+               }
+               if (e.type === "file") {
+                  value = e.value;
+                  if (e.value !== "")
+                     files.push(value);
+               }
             }
          }
+         elem.innerHTML = "các thuốc đã được nhập:<ul>";
+         for (value of drugs)
+            elem.innerHTML += ("<li>"+value+"</li>");
+         elem.innerHTML += "</ul>"
+         elem.innerHTML = "các ảnh đã được nhập:<ul>";
+         for (value of files)
+            elem.innerHTML += ("<li>"+value+"</li>");
          elem.innerHTML += "</ul>"
       }
       function on_hover() {
@@ -35,23 +50,70 @@
          elem = document.getElementsByClassName('unselected')[0];
          elem.style["box-shadow"] = "none";
       }
-      function add_row(elem) {
+      function add_row(elem, box) {
          elem.removeAttribute("onclick");
          elem.setAttribute("onclick", "delete_row(this)");
          elem.innerHTML = "x";
 
          let container = document.createElement("div");
          container.classList.add("row");
-         container.style.margin = "1em"
-         container.innerHTML =
-            `
-               <input type="text" class="form-control col-md" name="drug_name" placeholder="nhập tên thuốc vào đây." autofocus>
-               <button type="button" class="btn col-md-auto" style="margin-left:1em" onclick="add_row(this)">+</button>
-            `;
-         document.getElementById("text-entry").appendChild(container);
+         container.style.margin = "1em 0em"
+
+         if (box === "text-entry") {
+            container.innerHTML =
+               `<input type="text" class="form-control col-md" name="drug_name" placeholder="nhập tên thuốc vào đây." autofocus>
+               <button type="button" class="btn col-md-auto" style="margin-left:1em" onclick="add_row(this, '` + box + "')\">+</button>";
+         }
+         if (box === "image-entry") {
+            container.innerHTML =
+               `
+                  <button type="button" class="btn-primary col-md-6" onclick="pic_choose(this)">Chọn ảnh</button>
+                  <input type="file" style="display:none" accept="image/*" onchange="upload_to_cancel(this)"/>
+
+                  <button type="button" class="btn-secondary col-md prescription" onclick="toggle_type(this)" style="margin-left:1em">Đơn thuốc</button>
+
+                  <button type="button" class="btn col-md-auto" style="margin-left:1em;" onclick="add_row(this, 'image-entry')">+</button>
+               `;
+         }
+
+         document.getElementById(box).appendChild(container);
       }
       function delete_row(elem) {
          elem.parentNode.outerHTML = "";
+      }
+      function pic_choose(elem) {
+         elem.nextElementSibling.click();
+      }
+
+      function toggle_type(elem) {
+         if (elem.classList.contains("prescription")) {
+            elem.classList.remove("prescription");
+            elem.classList.add("actual-pill");
+            elem.innerText = "Vỉ/viên thuốc"
+         }
+         else {
+            elem.classList.add("prescription");
+            elem.classList.remove("actual-pill");
+            elem.innerText = "Đơn thuốc"
+         }
+      }
+
+      function upload_to_cancel(elem) {
+         let btn = elem.previousElementSibling;
+         btn.classList.remove("btn-primary");
+         btn.classList.add("btn-danger");
+         btn.innerText = "Huỷ ảnh đã nhận";
+         btn.removeAttribute("onclick");
+         btn.setAttribute("onclick", "cancel_to_upload(this)");
+      }
+
+      function cancel_to_upload(elem) {
+         elem.nextElementSibling.value = "";
+         elem.classList.add("btn-primary");
+         elem.classList.remove("btn-danger");
+         elem.innerText = "Chọn ảnh tải lên";
+         elem.removeAttribute("onclick");
+         elem.setAttribute("onclick", "pic_choose(this)");
       }
    </script>
 </head>
@@ -123,10 +185,25 @@
       </div>
 
       <form action="javascript:submit()" method="POST">
-         <div id="text-entry">
-            <div class="row" style="margin: 1em 1em;">
-               <input type="text" class="form-control col-md" name="drug_name" placeholder="nhập tên thuốc vào đây." autofocus>
-               <button type="button" class="btn col-md-auto" style="margin-left:1em;" onclick="add_row(this)">+</button>
+         <div class="row">
+            <div id="image-entry" class="col-md-6">
+               <div class="row">Tải lên ảnh thuốc hoặc đơn thuốc...</div>
+               <div class="row" style="margin: 1em 0em;">
+                  <button type="button" class="btn-primary col-md-6" onclick="pic_choose(this)">Chọn ảnh tải lên</button>
+                  <input type="file" style="display:none" accept="image/*" onchange="upload_to_cancel(this)"/>
+
+                  <button type="button" class="btn-secondary col-md prescription" onclick="toggle_type(this)" style="margin-left:1em">Đơn thuốc</button>
+
+                  <button type="button" class="btn col-md-auto" style="margin-left:1em;" onclick="add_row(this, 'image-entry')">+</button>
+               </div>
+            </div>
+
+            <div id="text-entry" class="col-md-6">
+               <div class="row">... hoặc nhập tên thuốc:</div>
+               <div class="row" style="margin: 1em 0em;">
+                  <input type="text" class="form-control col-md" name="drug_name" placeholder="nhập tên thuốc vào đây." autofocus>
+                  <button type="button" class="btn col-md-auto" style="margin-left:1em;" onclick="add_row(this, 'text-entry')">+</button>
+               </div>
             </div>
          </div>
 
