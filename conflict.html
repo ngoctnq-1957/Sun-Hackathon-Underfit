@@ -70,7 +70,7 @@
          if (box === "image-entry") {
             container.innerHTML =
                `
-                  <button type="button" class="btn-primary col-md-6" onclick="pic_choose(this)" onmouseenter="show_image(this)" onmouseleave="hide_image(this)">Chọn ảnh tải lên</button>
+                  <button type="button" class="btn-primary col-md-6" onclick="pic_choose(this)">Chọn ảnh tải lên</button>
                   <input type="file" style="display:none" accept="image/*" onchange="upload_to_cancel(this)"/>
 
                   <button type="button" class="btn-secondary col-md prescription" onclick="toggle_type(this)" style="margin-left:1em">Đơn thuốc</button>
@@ -84,7 +84,6 @@
          if (box === "image-entry") {
             container = document.createElement("img");
             container.classList.add("row");
-            container.style.display = "none";
             document.getElementById(box).appendChild(container);
          }
       }
@@ -202,6 +201,7 @@
       opacity: 0;
       box-shadow: 0 0 10px 1px #2f2f2f;
       transition: opacity .2s;
+      pointer-events: none;
    }
 
    .disclaimer {
