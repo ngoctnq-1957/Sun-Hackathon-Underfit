@@ -20,9 +20,10 @@
                }
                if (e.type === "file") {
                   value = e.value;
-                  if (e.value !== "")
+                  if (e.value !== "") {
                      imgtype.push(e.nextElementSibling.classList.contains("actual-pill"));
                      files.push(value);
+                  }
                }
             }
          }
